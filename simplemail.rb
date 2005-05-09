@@ -3,9 +3,23 @@
 
 require 'base64'
 require 'pathname'
-require 'rubygems'
-require 'mime/types'
 
+# try to bring in the mime/types module, make a dummy module if it can't be found
+begin
+	begin
+		require 'rubygems'
+	rescue
+	end
+	require 'mime/types'
+rescue
+	module MIME
+		class Types
+			def Types::type_for(filename)
+				return('')
+			end
+		end
+	end
+end
 
 # An easy class for creating a mail message
 class SimpleMail
