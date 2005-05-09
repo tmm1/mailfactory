@@ -197,8 +197,25 @@ class SimpleMail
 		@attachments << attachment
 	end
 	
+	
+	# adds an attachment to the mail as emailfilename.  Type may be given as a mime type.  If it
+	# is left off it will be determined automagically.
+	def add_attachment_as(filename, emailfilename, type=nil)
+		attachment = Array.new()
+		attachment[0] = emailfilename
+		attachment[1] = MIME::Types.type_for(filename).to_s
+		File.open(filename, File::RDONLY) { |fp|
+			attachment[2] = Base64.b64encode(fp.read())
+		}
+		@attachments << attachment
+	end
+	
+	
+	alias attach add_attachment
+	alias attach_as add_attachment_as
+	
 protected
-
+	
 	# returns the @headers as a properly formatted string
 	def headers_to_s()
 		return("#{@headers.join("\r\n")}\r\n\r\n")
