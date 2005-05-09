@@ -8,10 +8,10 @@ require 'pathname'
 begin
 	begin
 		require 'rubygems'
-	rescue
+	rescue LoadError
 	end
 	require 'mime/types'
-rescue
+rescue LoadError
 	module MIME
 		class Types
 			def Types::type_for(filename)
