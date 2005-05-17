@@ -103,15 +103,16 @@ class SimpleMail
 	end
 	
 	
-	# sets the HTML body of the message.  If raw is set to true then the newhtml will not
-	# be wrapped in a standard set of headers.  If it is left at false only the body of the
+	# sets the HTML body of the message. Only the body of the
 	# html should be provided
-	def html=(newhtml, raw=false)
-		if(raw)
-			@html = newhtml
-		else
-			@html = "<html>\n<head>\n<meta content=\"text/html;charset=ISO-8859-1\" http-equiv=\"Content-Type\">\n</head>\n<body bgcolor=\"#ffffff\" text=\"#000000\">\n#{newhtml}\n</body>\n</html>"
-		end
+	def html=(newhtml)
+		@html = "<html>\n<head>\n<meta content=\"text/html;charset=ISO-8859-1\" http-equiv=\"Content-Type\">\n</head>\n<body bgcolor=\"#ffffff\" text=\"#000000\">\n#{newhtml}\n</body>\n</html>"
+	end
+	
+	
+	# sets the HTML body of the message.  The entire HTML section should be provided
+	def rawhtml=(newhtml)
+		@html = newhtml
 	end
 	
 	
@@ -131,7 +132,7 @@ class SimpleMail
 	
 	# returns true if the email is multipart
 	def multipart?()
-		if(@attachments.length > 0 or (@text != nil and @html != nil))
+		if(@attachments.length > 0 or @html != nil)
 			return(true)
 		else
 			return(false)
@@ -153,7 +154,7 @@ class SimpleMail
 			
 			if(get_header("Content-Type").length == 0)
 				if(@attachments.length == 0)
-					add_header("Content-Type", "multipart/alternative; boundary=\"#{@attachmentboundary}\"")
+					add_header("Content-Type", "multipart/alternative;boundary=\"#{@bodyboundary}\"")
 				else
 					add_header("Content-Type", "multipart/mixed; boundary=\"#{@attachmentboundary}\"")
 				end
@@ -230,22 +231,32 @@ protected
 		if(!multipart?())
 			return(@text)
 		else
-			body << "This is a multi-part message in MIME format.\n--#{@attachmentboundary}\r\nContent-Type: multipart/alternative; boundary=\"#{@bodyboundary}\""
+			body << "This is a multi-part message in MIME format.\r\n\r\n--#{@attachmentboundary}\r\nContent-Type: multipart/alternative; boundary=\"#{@bodyboundary}\""
 			
-			# text part
-			body << "#{buildbodyboundary('text/plain; charset=ISO-8859-1; format=flowed', '7bit')}\r\n\r\n#{@text}"
-			
-			# html part
-			body << "#{buildbodyboundary('text/html; charset=ISO-8859-1', '7bit')}\r\n\r\n#{@html}"
-			
-			body << "--#{@bodyboundary}--"
-			
-			# and, the attachments
 			if(@attachments.length > 0)
-				@attachments.each() { |attachment|
-					body << "#{buildattachmentboundary(attachment[1], 'base64', attachment[0])}\r\n\r\n#{attachment[2]}"
-				}
-				body << "\r\n--#{@attachmentboundary}--"
+				# text part
+				body << "#{buildbodyboundary('text/plain; charset=ISO-8859-1; format=flowed', '7bit')}\r\n\r\n#{@text}"
+				
+				# html part
+				body << "#{buildbodyboundary('text/html; charset=ISO-8859-1', '7bit')}\r\n\r\n#{@html}"
+				
+				body << "--#{@bodyboundary}--"
+				
+				# and, the attachments
+				if(@attachments.length > 0)
+					@attachments.each() { |attachment|
+						body << "#{buildattachmentboundary(attachment[1], 'base64', attachment[0])}\r\n\r\n#{attachment[2]}"
+					}
+					body << "\r\n--#{@attachmentboundary}--"
+				end
+			else
+				# text part
+				body << "#{buildbodyboundary('text/plain; charset=ISO-8859-1; format=flowed', '7bit')}\r\n\r\n#{@text}"
+				
+				# html part
+				body << "#{buildbodyboundary('text/html; charset=ISO-8859-1', '7bit')}\r\n\r\n#{@html}"
+				
+				body << "--#{@bodyboundary}--"
 			end
 			
 			return(body.join("\r\n\r\n"))
@@ -261,7 +272,7 @@ protected
 	
 	
 	# builds a boundary string for inclusion in the body of a message
-	def buildbodyboundary(type, encoding, filename=nil)
+	def buildbodyboundary(type, encoding)
 		return("--#{@bodyboundary}\r\nContent-Type: #{type}\r\nContent-Transfer-Encoding: #{encoding}")
 	end
 	
