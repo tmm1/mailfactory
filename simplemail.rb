@@ -40,7 +40,7 @@ class SimpleMail
 	
 	# removes the named header - case insensitive
 	def remove_header(header)
-		@headers.delete_if() { |h|
+		@headers = @headers.delete_if() { |h|
 			header =~ /^#{header}:/i
 		}
 	end
