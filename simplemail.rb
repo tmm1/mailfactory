@@ -40,8 +40,10 @@ class SimpleMail
 	
 	# removes the named header - case insensitive
 	def remove_header(header)
-		@headers = @headers.delete_if() { |h|
-			header =~ /^#{header}:/i
+		@headers.each_index() { |i|
+			if(@headers[i] =~ /^#{Regexp.escape(header)}:/i)
+				@headers.delete_at(i)
+			end
 		}
 	end
 	

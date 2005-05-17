@@ -16,6 +16,19 @@ class TC_SimpleMail < Test::Unit::TestCase
 		}
 		
 		assert_equal(@mail.to, "test@test.com", "to does not equal what it was set to")
+		
+		assert_nothing_raised("exception raised while setting to=") {
+			@mail.to = "test@test2.com"
+		}
+		
+		# count to headers in the final message to make sure we have only one
+		count = 0
+		@mail.to_s().each_line() { |line|
+			if(line =~ /^To:/)
+				count = count + 1
+			end
+		}
+		assert_equal(1, count, "Count of To: headers expected to be 1, but was #{count}")
 	end
 
 	def test_set_from
