@@ -1,12 +1,12 @@
 #!/usr/local/bin/ruby
 
 require 'test/unit'
-require 'simplemail'
+require '../lib/mailfactory.rb'
 
-class TC_SimpleMail < Test::Unit::TestCase
+class TC_MailFactory < Test::Unit::TestCase
 
 	def setup()
-		@mail = SimpleMail.new
+		@mail = MailFactory.new
 	end
 	
 	

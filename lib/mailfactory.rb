@@ -22,7 +22,7 @@ rescue LoadError
 end
 
 # An easy class for creating a mail message
-class SimpleMail
+class MailFactory
 	
 	def initialize()
 		@headers = Array.new()
