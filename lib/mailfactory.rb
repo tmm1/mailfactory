@@ -1,4 +1,31 @@
-#!/usr/local/bin/ruby
+# = Overview:
+# A simple to use module for generating RFC compliant MIME mail
+# ---
+# = License:
+# Author:: David Powers
+# Copyright:: May, 2005
+# License:: Ruby License
+# ---
+# = Usage:
+# 	require 'net/smtp'
+# 	require 'rubygems'
+# 	require 'mailfactory'
+#
+#
+# 	mail = MailFactory.new()
+# 	mail.to = "test@test.com"
+# 	mail.from = "sender@sender.com"
+# 	mail.subject = "Here are some files for you!"
+# 	mail.text = "This is what people with plain text mail readers will see"
+# 	mail.html = "A little something <b>special</b> for people with HTML readers"
+# 	mail.attach("/etc/fstab")
+# 	mail.attach("/some/other/file")
+#
+# 	Net::SMTP.start('smtp1.testmailer.com', 25, 'mail.from.domain', fromaddress, password, :cram_md5) { |smtp|
+# 		mail.to = toaddress
+# 		smtp.send_message(mail.to_s(), fromaddress, toaddress)
+# 	}
+
 
 
 require 'base64'
@@ -189,7 +216,7 @@ class MailFactory
 	
 	
 	# adds an attachment to the mail.  Type may be given as a mime type.  If it
-	# is left off it will be determined automagically.
+	# is left off and the MIME::Types module is available it will be determined automagically.
 	def add_attachment(filename, type=nil)
 		attachment = Array.new()
 		attachment[0] = Pathname.new(filename).basename
@@ -202,7 +229,7 @@ class MailFactory
 	
 	
 	# adds an attachment to the mail as emailfilename.  Type may be given as a mime type.  If it
-	# is left off it will be determined automagically.
+	# is left off and the MIME::Types module is available it will be determined automagically.
 	def add_attachment_as(filename, emailfilename, type=nil)
 		attachment = Array.new()
 		attachment[0] = emailfilename
