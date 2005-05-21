@@ -24,7 +24,7 @@ class TC_MailFactory < Test::Unit::TestCase
 		# count to headers in the final message to make sure we have only one
 		count = 0
 		@mail.to_s().each_line() { |line|
-			if(line =~ /^To:/)
+			if(line =~ /^To:/i)
 				count = count + 1
 			end
 		}
@@ -37,6 +37,19 @@ class TC_MailFactory < Test::Unit::TestCase
 		}
 		
 		assert_equal(@mail.from, "test@test.com", "from does not equal what it was set to")
+
+		assert_nothing_raised("exception raised while setting from=") {
+			@mail.from = "test@test2.com"
+		}
+		
+		# count to headers in the final message to make sure we have only one
+		count = 0
+		@mail.to_s().each_line() { |line|
+			if(line =~ /^From:/i)
+				count = count + 1
+			end
+		}
+		assert_equal(1, count, "Count of From: headers expected to be 1, but was #{count}")
 	end
 
 	def test_set_subject
@@ -45,6 +58,19 @@ class TC_MailFactory < Test::Unit::TestCase
 		}
 		
 		assert_equal(@mail.subject, "Test Subject", "subject does not equal what it was set to")
+
+		assert_nothing_raised("exception raised while setting subject=") {
+			@mail.subject = "A Different Subject"
+		}
+		
+		# count to headers in the final message to make sure we have only one
+		count = 0
+		@mail.to_s().each_line() { |line|
+			if(line =~ /^Subject:/i)
+				count = count + 1
+			end
+		}
+		assert_equal(1, count, "Count of Subject: headers expected to be 1, but was #{count}")		
 	end
 
 	def test_set_header
