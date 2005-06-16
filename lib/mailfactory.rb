@@ -231,8 +231,14 @@ class MailFactory
 	def add_attachment(filename, type=nil)
 		attachment = Array.new()
 		attachment[0] = Pathname.new(filename).basename
-		attachment[1] = MIME::Types.type_for(filename).to_s
-		File.open(filename, File::RDONLY) { |fp|
+		if(type == nil)
+			attachment[1] = MIME::Types.type_for(filename).to_s
+		else
+			attachment[1] = type
+		end	
+		
+		# Open in rb mode to handle Windows, which mangles binary files opened in a text mode
+		File.open(filename, "rb") { |fp|
 			attachment[2] = Base64.b64encode(fp.read())
 		}
 		@attachments << attachment
@@ -241,13 +247,24 @@ class MailFactory
 	
 	# adds an attachment to the mail as emailfilename.  Type may be given as a mime type.  If it
 	# is left off and the MIME::Types module is available it will be determined automagically.
-	def add_attachment_as(filename, emailfilename, type=nil)
+	# file may be given as an IO stream (which will be read until the end) or as a filename.
+	def add_attachment_as(file, emailfilename, type=nil)
 		attachment = Array.new()
 		attachment[0] = emailfilename
-		attachment[1] = MIME::Types.type_for(filename).to_s
-		File.open(filename, File::RDONLY) { |fp|
-			attachment[2] = Base64.b64encode(fp.read())
-		}
+		if(!file.respond_to?(:stat) and type == nil)
+			attachment[1] = MIME::Types.type_for(file.to_s()).to_s
+		else
+			attachemnt[1] = type
+		end
+		
+		if(file.respond_to?(:stat))		
+			# Open in rb mode to handle Windows, which mangles binary files opened in a text mode
+			File.open(file.to_s(), "rb") { |fp|
+				attachment[2] = Base64.b64encode(fp.read())
+			}
+		else
+			attachment[2] = Base64.b64encode(file.read())			
+		end
 		@attachments << attachment
 	end
 	
