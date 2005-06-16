@@ -254,7 +254,7 @@ class MailFactory
 		if(!file.respond_to?(:stat) and type == nil)
 			attachment[1] = MIME::Types.type_for(file.to_s()).to_s
 		else
-			attachemnt[1] = type
+			attachment[1] = type
 		end
 		
 		if(file.respond_to?(:stat))		
