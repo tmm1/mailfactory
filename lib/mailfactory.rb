@@ -257,7 +257,7 @@ class MailFactory
 			attachment[1] = type
 		end
 		
-		if(file.respond_to?(:stat))		
+		if(!file.respond_to?(:stat))		
 			# Open in rb mode to handle Windows, which mangles binary files opened in a text mode
 			File.open(file.to_s(), "rb") { |fp|
 				attachment[2] = Base64.b64encode(fp.read())
