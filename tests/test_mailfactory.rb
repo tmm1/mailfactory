@@ -1,7 +1,46 @@
 #!/usr/local/bin/ruby
 
-require 'test/unit'
+require 'test/unit/ui/console/testrunner'
 require '../lib/mailfactory.rb'
+
+
+def get_options()
+	options = Hash.new()
+	
+	opts = OptionParser.new() { |opts|
+		opts.on_tail("-h", "--help", "Print this message") {
+			print(opts)
+			exit()
+		}
+
+		opts.on("-s", "--smtpserver SERVER", "SMTP server to use for remote tests") { |server|
+			options['smtpserver'] = server
+		}
+		
+		opts.on("-f", "--from ADDRESS", "address to send the mail from") { |address|
+			options['from'] = address
+		}
+		
+		opts.on("-t", "--to ADDRESS", "address to send the mail to") { |address|
+			options['to'] = address
+		}
+		
+		opts.on("-u", "--username USERNAME", "username for smtp auth (required)") { |username|
+			options['username'] = username
+		}
+		
+		opts.on("-p", "--password PASSWORD", "password for smtp auth (required)") { |password|
+			options['password'] = password
+		}
+				
+	}
+	
+	opts.parse(ARGV)
+	
+	return(options)
+end
+
+
 
 class TC_MailFactory < Test::Unit::TestCase
 
@@ -30,6 +69,7 @@ class TC_MailFactory < Test::Unit::TestCase
 		}
 		assert_equal(1, count, "Count of To: headers expected to be 1, but was #{count}")
 	end
+	
 
 	def test_set_from
 		assert_nothing_raised("exception raised while setting from=") {
@@ -52,6 +92,7 @@ class TC_MailFactory < Test::Unit::TestCase
 		assert_equal(1, count, "Count of From: headers expected to be 1, but was #{count}")
 	end
 
+
 	def test_set_subject
 		assert_nothing_raised("exception raised while setting subject=") {
 			@mail.subject = "Test Subject"
@@ -73,6 +114,7 @@ class TC_MailFactory < Test::Unit::TestCase
 		assert_equal(1, count, "Count of Subject: headers expected to be 1, but was #{count}")		
 	end
 
+
 	def test_set_header
 		assert_nothing_raised("exception raised while setting arbitrary header") {
 			@mail.set_header("arbitrary", "some value")
@@ -80,6 +122,7 @@ class TC_MailFactory < Test::Unit::TestCase
 		
 		assert_equal("some value", @mail.get_header("arbitrary")[0], "arbitrary header does not equal \"some value\"")
 	end
+
 	
 	def test_boundary_generator
 		1.upto(50) {
@@ -87,10 +130,32 @@ class TC_MailFactory < Test::Unit::TestCase
 		}
 	end
 	
+
 	def test_email
 		@mail.to="test@test.com"
 		@mail.from="test@othertest.com"
 		@mail.subject="This is a test"
 		@mail.text = "This is a test message with\na few\n\nlines."
+		
+		@mail.attach('testfile.txt')
+		@mail.attach('testsheet.xls')
+		
+		if($options['smtpserver'] != nil and $options['to'] != nil and $options['from'] != nil)
+			assert_nothing_raised() {
+				require('net/smtp')
+				Net::SMTP.start($options['smtpserver'], 25, 'mail.from.domain', $options['username'], $options['password'], :cram_md5) { |smtp|
+	              smtp.send_message(@mail.to_s(), $options['from'], $options['to'])
+	      	}
+			}
+		end
 	end
+	
+	
+	def test_attach
+	end
+	
 end
+
+
+$options = get_options()
+Test::Unit::UI::Console::TestRunner.run(TC_MailFactory)
