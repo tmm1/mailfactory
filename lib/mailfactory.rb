@@ -126,6 +126,17 @@ class MailFactory
 	end
 	
 	
+	def replyto=(newreplyto)
+		remove_header("Reply-To")
+		add_header("Reply-To", newreplyto)
+	end
+	
+	
+	def replyto()
+		return(get_header("Reply-To")[0])
+	end
+	
+	
 	# sets the plain text body of the message
 	def text=(newtext)
 		@text = newtext
