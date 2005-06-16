@@ -151,7 +151,23 @@ class TC_MailFactory < Test::Unit::TestCase
 	end
 	
 	
-	def test_attach
+	def test_attach_as
+		@mail.to="test@test.com"
+		@mail.from="test@othertest.com"
+		@mail.subject="This is a test"
+		@mail.text = "This is a test message with\na few\n\nlines."
+
+		@mail.add_attachment_as('testfile.txt', 'newname.txt')
+		@mail.add_attachment_as(File.open('testsheet.xls', 'rb'), 'newname.xls', 'application/vnd.ms-excel')
+
+		if($options['smtpserver'] != nil and $options['to'] != nil and $options['from'] != nil)
+			assert_nothing_raised() {
+				require('net/smtp')
+				Net::SMTP.start($options['smtpserver'], 25, 'mail.from.domain', $options['username'], $options['password'], :cram_md5) { |smtp|
+		           smtp.send_message(@mail.to_s(), $options['from'], $options['to'])
+		   	}
+			}
+		end
 	end
 	
 end
