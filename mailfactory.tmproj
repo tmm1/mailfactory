@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>scripts/release.sh</string>
+	<string>tests/test_mailfactory.rb</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -28,14 +28,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>4</integer>
+				<integer>3</integer>
 				<key>line</key>
-				<integer>26</integer>
+				<integer>262</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>227</integer>
+			<integer>235</integer>
 		</dict>
 		<key>scripts/release.sh</key>
 		<dict>
@@ -56,14 +56,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>87</integer>
+				<integer>50</integer>
 				<key>line</key>
-				<integer>145</integer>
+				<integer>160</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>124</integer>
+			<integer>140</integer>
 		</dict>
 		<key>tests/testfile.txt</key>
 		<dict>
@@ -90,6 +90,6 @@
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{258, 94}, {826, 733}}</string>
+	<string>{{287, 93}, {826, 733}}</string>
 </dict>
 </plist>
