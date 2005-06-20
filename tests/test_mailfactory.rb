@@ -54,7 +54,7 @@ class TC_MailFactory < Test::Unit::TestCase
 			@mail.to = "test@test.com"
 		}
 		
-		assert_equal(@mail.to, "test@test.com", "to does not equal what it was set to")
+		assert_equal(@mail.to, ["test@test.com"], "to does not equal what it was set to")
 		
 		assert_nothing_raised("exception raised while setting to=") {
 			@mail.to = "test@test2.com"
@@ -76,7 +76,7 @@ class TC_MailFactory < Test::Unit::TestCase
 			@mail.from = "test@test.com"
 		}
 		
-		assert_equal(@mail.from, "test@test.com", "from does not equal what it was set to")
+		assert_equal(@mail.from, ["test@test.com"], "from does not equal what it was set to")
 
 		assert_nothing_raised("exception raised while setting from=") {
 			@mail.from = "test@test2.com"
@@ -98,7 +98,7 @@ class TC_MailFactory < Test::Unit::TestCase
 			@mail.subject = "Test Subject"
 		}
 		
-		assert_equal(@mail.subject, "Test Subject", "subject does not equal what it was set to")
+		assert_equal(@mail.subject, ["Test Subject"], "subject does not equal what it was set to")
 
 		assert_nothing_raised("exception raised while setting subject=") {
 			@mail.subject = "A Different Subject"
@@ -121,6 +121,21 @@ class TC_MailFactory < Test::Unit::TestCase
 		}
 		
 		assert_equal("some value", @mail.get_header("arbitrary")[0], "arbitrary header does not equal \"some value\"")
+
+		assert_nothing_raised("exception raised while setting arbitrary header with _") {
+			@mail.arbitrary_header = "some _ value"
+		}
+
+		assert_equal(["some _ value"], @mail.get_header("arbitrary-header"), "arbitrary header does not equal \"some _ value\"")
+		assert_equal(["some _ value"], @mail.arbitrary_header, "arbitrary header does not equal \"some _ value\"")
+
+
+		assert_nothing_raised("exception raised while setting arbitraryHeader") {
+			@mail.arbitraryHeader = "someValue"
+		}
+
+		assert_equal(["someValue"], @mail.get_header("arbitrary-header"), "arbitrary header does not equal \"someValue\"")
+		assert_equal(["someValue"], @mail.arbitraryHeader, "arbitrary header does not equal \"someValue\"")
 	end
 
 	
