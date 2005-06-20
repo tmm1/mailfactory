@@ -82,50 +82,6 @@ class MailFactory
 	end
 	
 	
-	def to=(newto)
-		remove_header("To")
-		add_header("To", newto)
-	end
-	
-	
-	def to()
-		return(get_header("To")[0])
-	end
-	
-	
-	def from=(newfrom)
-		remove_header("From")
-		add_header("From", newfrom)
-	end
-	
-	
-	def from()
-		return(get_header("From")[0])
-	end
-	
-	
-	def subject=(newsubject)
-		remove_header("Subject")
-		add_header("Subject", newsubject)
-	end
-	
-	
-	def subject()
-		return(get_header("Subject")[0])
-	end
-	
-	
-	def cc=(newcc)
-		remove_header("CC")
-		add_header("CC", newcc)
-	end
-	
-	
-	def cc()
-		return(get_header("CC")[0])
-	end
-	
-	
 	def replyto=(newreplyto)
 		remove_header("Reply-To")
 		add_header("Reply-To", newreplyto)
@@ -155,6 +111,35 @@ class MailFactory
 		@html = newhtml
 	end
 	
+	
+	# implement method missing to provide helper methods for setting and getting headers.
+	# Headers with '-' characters may be set/gotten as 'x_mailer' or 'XMailer' (splitting
+	# will occur between capital letters or on '_' chracters)
+	def method_missing(methId, *args)
+		name = methId.id2name()
+		
+		# mangle the name if we have to
+		if(name =~ /_/)
+			name = name.gsub(/_/, '-')
+		elsif(name =~ /[A-Z]/)
+			name = name.gsub(/([a-zA-Z])([A-Z])/, '\1-\2')
+		end
+		
+		# determine if it sets or gets, and do the right thing
+		if(name =~ /=$/)
+			if(args.length != 1)
+				super(methId, args)
+			end
+			set_header(name[/^(.*)=$/, 1], args[0])			
+		else
+			if(args.length != 0)
+				super(methId, args)
+			end
+			headers = get_header(name)
+			return(get_header(name))
+		end
+	end
+
 	
 	# returns the value (or values) of the named header in an array
 	def get_header(header)
