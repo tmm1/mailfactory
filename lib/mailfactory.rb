@@ -182,10 +182,14 @@ class MailFactory
 	
 	# returns a formatted email
 	def to_s()
+		# all emails get a unique message-id
+		remove_header("Message-ID")
+		add_header("Message-ID", "<#{Time.now.to_f()}.#{Process.euid()}.#{String.new.object_id()}>")
+
 		if(get_header("Date").length == 0)
 			add_header("Date", Time.now.strftime("%a, %d %B %Y %H:%M:%S %Z"))
 		end
-		
+
 		# Add a mime header if we don't already have one and we have multiple parts
 		if(multipart?())
 			if(get_header("MIME-Version").length == 0)
