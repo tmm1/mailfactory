@@ -1,7 +1,7 @@
 #!/usr/local/bin/ruby
 
 require 'test/unit/ui/console/testrunner'
-require '../lib/mailfactory.rb'
+require File.dirname(__FILE__) + '/../lib/mailfactory.rb'
 
 
 def get_options()
@@ -152,8 +152,8 @@ class TC_MailFactory < Test::Unit::TestCase
 		@mail.subject="This is a test"
 		@mail.text = "This is a test message with\na few\n\nlines."
 		
-		@mail.attach('testfile.txt')
-		@mail.attach('testsheet.xls')
+		@mail.attach(File.dirname(__FILE__) + '/testfile.txt')
+		@mail.attach(File.dirname(__FILE__) + '/testsheet.xls')
 		
 		if($options['smtpserver'] != nil and $options['to'] != nil and $options['from'] != nil)
 			assert_nothing_raised() {
@@ -172,8 +172,8 @@ class TC_MailFactory < Test::Unit::TestCase
 		@mail.subject="This is a test"
 		@mail.text = "This is a test message with\na few\n\nlines."
 
-		@mail.add_attachment_as('testfile.txt', 'newname.txt')
-		@mail.add_attachment_as(File.open('testsheet.xls', 'rb'), 'newname.xls', 'application/vnd.ms-excel')
+		@mail.add_attachment_as(File.dirname(__FILE__) + '/testfile.txt', 'newname.txt')
+		@mail.add_attachment_as(File.open(File.dirname(__FILE__) + '/testsheet.xls', 'rb'), 'newname.xls', 'application/vnd.ms-excel')
 
 		if($options['smtpserver'] != nil and $options['to'] != nil and $options['from'] != nil)
 			assert_nothing_raised() {
