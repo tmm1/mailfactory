@@ -248,13 +248,15 @@ class MailFactory
 			attachment[1] = type
 		end
 		
-		if(!file.respond_to?(:stat))		
+		if(file.kind_of?(String) or file.kind_of?(Pathname))		
 			# Open in rb mode to handle Windows, which mangles binary files opened in a text mode
 			File.open(file.to_s(), "rb") { |fp|
 				attachment[2] = Base64.b64encode(fp.read())
 			}
+		elsif(file.respond_to?(:read))
+			attachment[2] = Base64.b64encode(file.read())
 		else
-			attachment[2] = Base64.b64encode(file.read())			
+			raise(Exception, "file is not a supported type")
 		end
 		@attachments << attachment
 	end
