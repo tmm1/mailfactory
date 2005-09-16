@@ -56,6 +56,8 @@ class MailFactory
 		@attachments = Array.new()
 		@attachmentboundary = generate_boundary()
 		@bodyboundary = generate_boundary()
+		@html = nil
+		@text = nil
 	end
 	
 	
