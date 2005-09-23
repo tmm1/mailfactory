@@ -360,7 +360,7 @@ protected
 	# add_attachment and add_attachment_as
 	def buildattachmentboundary(attachment)
 		disposition = "Content-Disposition: inline; filename=\"#{attachment['filename']}\""
-		boundary = "--#{@attachmentboundary}\r\nContent-Type: #{type}; name=\"#{attachment['filename']}\"\r\nContent-Transfer-Encoding: base64\r\n#{disposition}"
+		boundary = "--#{@attachmentboundary}\r\nContent-Type: #{attachment['mimetype']}; name=\"#{attachment['filename']}\"\r\nContent-Transfer-Encoding: base64\r\n#{disposition}"
 		if(attachment['headers'])
 			boundary = boundary + "\r\n#{attachment['headers'].join("\r\n")}"
 		end
