@@ -219,19 +219,30 @@ class MailFactory
 	
 	# adds an attachment to the mail.  Type may be given as a mime type.  If it
 	# is left off and the MIME::Types module is available it will be determined automagically.
-	def add_attachment(filename, type=nil)
-		attachment = Array.new()
-		attachment[0] = Pathname.new(filename).basename
+	# If the optional attachemntheaders is given, then they will be added to the attachment
+	# boundary in the email, which can be used to produce Content-ID markers.  attachmentheaders
+	# can be given as an Array or a String.
+	def add_attachment(filename, type=nil, attachmentheaders = nil)
+		attachment = Hash.new()
+		attachment['filename'] = Pathname.new(filename).basename
 		if(type == nil)
-			attachment[1] = MIME::Types.type_for(filename).to_s
+			attachment['mimetype'] = MIME::Types.type_for(filename).to_s
 		else
-			attachment[1] = type
+			attachment['mimetype'] = type
 		end	
 		
 		# Open in rb mode to handle Windows, which mangles binary files opened in a text mode
 		File.open(filename, "rb") { |fp|
-			attachment[2] = Base64.b64encode(fp.read())
+			attachment['attachment'] = Base64.b64encode(fp.read())
 		}
+
+		if(attachmentheaders != nil)
+			if(!attachmentheaders.kind_of?(Array))
+				attachmentheaders = attachmentheaders.split(/\r?\n/)
+			end
+			attachment['headers'] = attachmentheaders
+		end
+
 		@attachments << attachment
 	end
 	
@@ -239,25 +250,39 @@ class MailFactory
 	# adds an attachment to the mail as emailfilename.  Type may be given as a mime type.  If it
 	# is left off and the MIME::Types module is available it will be determined automagically.
 	# file may be given as an IO stream (which will be read until the end) or as a filename.
-	def add_attachment_as(file, emailfilename, type=nil)
-		attachment = Array.new()
-		attachment[0] = emailfilename
-		if(!file.respond_to?(:stat) and type == nil)
-			attachment[1] = MIME::Types.type_for(file.to_s()).to_s
+	# If the optional attachemntheaders is given, then they will be added to the attachment
+	# boundary in the email, which can be used to produce Content-ID markers.  attachmentheaders
+	# can be given as an Array of a String.
+	def add_attachment_as(file, emailfilename, type=nil, attachmentheaders = nil)
+		attachment = Hash.new()
+		attachment['filename'] = emailfilename
+
+		if(type != nil)
+			attachment['mimetype'] = type.to_s()
+		elsif(file.kind_of?(String) or file.kind_of?(Pathname))
+			attachment['mimetype'] = MIME::Types.type_for(file.to_s()).to_s
 		else
-			attachment[1] = type
+			attachment['mimetype'] = ''
 		end
 		
 		if(file.kind_of?(String) or file.kind_of?(Pathname))		
 			# Open in rb mode to handle Windows, which mangles binary files opened in a text mode
 			File.open(file.to_s(), "rb") { |fp|
-				attachment[2] = Base64.b64encode(fp.read())
+				attachment['attachment'] = Base64.b64encode(fp.read())
 			}
 		elsif(file.respond_to?(:read))
-			attachment[2] = Base64.b64encode(file.read())
+			attachment['attachment'] = Base64.b64encode(file.read())
 		else
-			raise(Exception, "file is not a supported type")
+			raise(Exception, "file is not a supported type (must be a String, Pathnamem, or support read method)")
 		end
+		
+		if(attachmentheaders != nil)
+			if(!attachmentheaders.kind_of?(Array))
+				attachmentheaders = attachmentheaders.split(/\r?\n/)
+			end
+			attachment['headers'] = attachmentheaders
+		end
+		
 		@attachments << attachment
 	end
 	
@@ -295,7 +320,7 @@ protected
 				# and, the attachments
 				if(@attachments.length > 0)
 					@attachments.each() { |attachment|
-						body << "#{buildattachmentboundary(attachment[1], 'base64', attachment[0])}\r\n\r\n#{attachment[2]}"
+						body << "#{buildattachmentboundary(attachment)}\r\n\r\n#{attachment['attachment']}"
 					}
 					body << "\r\n--#{@attachmentboundary}--"
 				end
@@ -314,10 +339,16 @@ protected
 	end
 	
 	
-	# builds a boundary string for including attachments in the body
-	def buildattachmentboundary(type, encoding, filename)
-		disposition = "\r\nContent-Disposition: inline; filename=\"#{filename}\""
-		return("--#{@attachmentboundary}\r\nContent-Type: #{type}; name=\"#{filename}\"\r\nContent-Transfer-Encoding: #{encoding}#{disposition}")
+	# builds a boundary string for including attachments in the body, expects an attachment hash as built by
+	# add_attachment and add_attachment_as
+	def buildattachmentboundary(attachment)
+		disposition = "Content-Disposition: inline; filename=\"#{attachment['filename']}\""
+		boundary = "--#{@attachmentboundary}\r\nContent-Type: #{type}; name=\"#{attachment['filename']}\"\r\nContent-Transfer-Encoding: base64\r\n#{disposition}"
+		if(attachment['headers'])
+			boundary = boundary + "\r\n#{attachment['headers'].join("\r\n")}"
+		end
+		
+		return(boundary)
 	end
 	
 	
