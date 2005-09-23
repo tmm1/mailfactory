@@ -166,16 +166,26 @@ class MailFactory
 		end
 	end
 	
-	
-	# returns a formatted email
-	def to_s()
-		# all emails get a unique message-id
-		remove_header("Message-ID")
-		sendingdomain = get_header('from')[0].to_s()[/@([-a-zA-Z0-9._]+)/,1].to_s()
-		add_header("Message-ID", "<#{Time.now.to_f()}.#{Process.euid()}.#{String.new.object_id()}@#{sendingdomain}>")
 
-		if(get_header("Date").length == 0)
-			add_header("Date", Time.now.strftime("%a, %d %B %Y %H:%M:%S %Z"))
+	# builds an email and returns it as a string.  Takes the following options:
+	# <tt>:messageid</tt>:: Adds a message id to the message based on the from header (defaults to false)
+	# <tt>:date</tt>:: Adds a date to the message if one is not present (defaults to true)
+	def construct(options = Hash.new)
+		if(options[:date] == nil)
+			options[:date] = true
+		end
+		
+		if(options[:messageid])
+			# add a unique message-id
+			remove_header("Message-ID")
+			sendingdomain = get_header('from')[0].to_s()[/@([-a-zA-Z0-9._]+)/,1].to_s()
+			add_header("Message-ID", "<#{Time.now.to_f()}.#{Process.euid()}.#{String.new.object_id()}@#{sendingdomain}>")
+		end
+
+		if(options[:date])
+			if(get_header("Date").length == 0)
+				add_header("Date", Time.now.strftime("%a, %d %B %Y %H:%M:%S %Z"))
+			end
 		end
 
 		# Add a mime header if we don't already have one and we have multiple parts
@@ -194,6 +204,12 @@ class MailFactory
 		end
 		
 		return("#{headers_to_s()}#{body_to_s()}")
+	end
+
+	
+	# returns a formatted email - equivalent to construct(:messageid => true) 
+	def to_s()
+		return(construct(:messageid => true))
 	end
 	
 	
