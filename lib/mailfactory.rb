@@ -171,7 +171,8 @@ class MailFactory
 	def to_s()
 		# all emails get a unique message-id
 		remove_header("Message-ID")
-		add_header("Message-ID", "<#{Time.now.to_f()}.#{Process.euid()}.#{String.new.object_id()}>")
+		sendingdomain = get_header('from')[0].to_s()[/@([-a-zA-Z0-9._]+)/,1].to_s()
+		add_header("Message-ID", "<#{Time.now.to_f()}.#{Process.euid()}.#{String.new.object_id()}@#{sendingdomain}>")
 
 		if(get_header("Date").length == 0)
 			add_header("Date", Time.now.strftime("%a, %d %B %Y %H:%M:%S %Z"))
