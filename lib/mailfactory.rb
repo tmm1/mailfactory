@@ -250,7 +250,7 @@ class MailFactory
 		
 		# Open in rb mode to handle Windows, which mangles binary files opened in a text mode
 		File.open(filename, "rb") { |fp|
-			attachment['attachment'] = Base64.b64encode(fp.read())
+			attachment['attachment'] = file_encode(fp.read())
 		}
 
 		if(attachmentheaders != nil)
@@ -285,10 +285,10 @@ class MailFactory
 		if(file.kind_of?(String) or file.kind_of?(Pathname))		
 			# Open in rb mode to handle Windows, which mangles binary files opened in a text mode
 			File.open(file.to_s(), "rb") { |fp|
-				attachment['attachment'] = Base64.b64encode(fp.read())
+				attachment['attachment'] = file_encode(fp.read())
 			}
 		elsif(file.respond_to?(:read))
-			attachment['attachment'] = Base64.b64encode(file.read())
+			attachment['attachment'] = file_encode(file.read())
 		else
 			raise(Exception, "file is not a supported type (must be a String, Pathnamem, or support read method)")
 		end
@@ -373,6 +373,19 @@ protected
 	def buildbodyboundary(type, encoding)
 		return("--#{@bodyboundary}\r\nContent-Type: #{type}\r\nContent-Transfer-Encoding: #{encoding}")
 	end
-	
+
+
+  # returns a base64 encoded version of the contents of str
+  def file_encode(str)
+    collection = Array.new()
+    enc = Base64.encode64(str)
+#    while(enc.length > 60)
+#      collection << enc.slice!(0..59)
+#    end
+#    collection << enc
+#    return(collection.join("\n"))
+    return(enc)
+  end
+  
 end
 
