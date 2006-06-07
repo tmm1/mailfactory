@@ -329,8 +329,10 @@ protected
 				# text part
 				body << "#{buildbodyboundary('text/plain; charset=ISO-8859-1; format=flowed', '7bit')}\r\n\r\n#{@text}"
 				
-				# html part
-				body << "#{buildbodyboundary('text/html; charset=ISO-8859-1', '7bit')}\r\n\r\n#{@html}"
+				# html part if one is provided
+				if @html
+					body << "#{buildbodyboundary('text/html; charset=ISO-8859-1', '7bit')}\r\n\r\n#{@html}"
+				end
 				
 				body << "--#{@bodyboundary}--"
 				
