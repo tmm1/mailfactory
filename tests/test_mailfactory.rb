@@ -1,4 +1,4 @@
-#!/usr/local/bin/ruby
+#!/usr/bin/env ruby
 
 require 'test/unit/ui/console/testrunner'
 require File.dirname(__FILE__) + '/../lib/mailfactory.rb'
@@ -164,8 +164,8 @@ class TC_MailFactory < Test::Unit::TestCase
 			}
 		end
 	end
-	
-	
+
+
 	def test_attach_as
 		@mail.to="test@test.com"
 		@mail.from="test@othertest.com"
