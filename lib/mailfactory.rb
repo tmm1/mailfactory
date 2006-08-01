@@ -184,7 +184,7 @@ class MailFactory
 
 		if(options[:date])
 			if(get_header("Date").length == 0)
-				add_header("Date", Time.now.strftime("%a, %d %B %Y %H:%M:%S %Z"))
+				add_header("Date", Time.now.strftime("%a, %d %b %Y %H:%M:%S %z"))
 			end
 		end
 
