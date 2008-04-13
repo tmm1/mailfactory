@@ -50,7 +50,7 @@ end
 
 # An easy class for creating a mail message
 class MailFactory
-	
+  
 	def initialize()
 		@headers = Array.new()
 		@attachments = Array.new()
@@ -58,11 +58,15 @@ class MailFactory
 		@bodyboundary = generate_boundary()
 		@html = nil
 		@text = nil
+                @charset = 'utf-8'
 	end
 	
 	
 	# adds a header to the bottom of the headers
 	def add_header(header, value)
+                value = quote_if_necessary(value, @charset) if header == 'subject'
+                value = quote_address_if_necessary(value, @charset) if header == 'from'
+                value = quote_address_if_necessary(value, @charset) if header == 'to'
 		@headers << "#{header}: #{value}"
 	end
 	
@@ -104,7 +108,7 @@ class MailFactory
 	# sets the HTML body of the message. Only the body of the
 	# html should be provided
 	def html=(newhtml)
-		@html = "<html>\n<head>\n<meta content=\"text/html;charset=ISO-8859-1\" http-equiv=\"Content-Type\">\n</head>\n<body bgcolor=\"#ffffff\" text=\"#000000\">\n#{newhtml}\n</body>\n</html>"
+		@html = "<html>\n<head>\n<meta content=\"text/html;charset=#{@charset}\" http-equiv=\"Content-Type\">\n</head>\n<body bgcolor=\"#ffffff\" text=\"#000000\">\n#{newhtml}\n</body>\n</html>"
 	end
 	
 	
@@ -327,11 +331,11 @@ protected
 			
 			if(@attachments.length > 0)
 				# text part
-				body << "#{buildbodyboundary('text/plain; charset=ISO-8859-1; format=flowed', '7bit')}\r\n\r\n#{@text}"
+				body << "#{buildbodyboundary("text/plain; charset=#{@charset}; format=flowed", 'quoted-printable')}\r\n\r\n#{quote_text_if_necessary(@text)}"
 				
 				# html part if one is provided
 				if @html
-					body << "#{buildbodyboundary('text/html; charset=ISO-8859-1', '7bit')}\r\n\r\n#{@html}"
+					body << "#{buildbodyboundary("text/html; charset=#{@charset}", 'quoted-printable')}\r\n\r\n#{quote_text_if_necessary(@html)}"
 				end
 				
 				body << "--#{@bodyboundary}--"
@@ -345,10 +349,10 @@ protected
 				end
 			else
 				# text part
-				body << "#{buildbodyboundary('text/plain; charset=ISO-8859-1; format=flowed', '7bit')}\r\n\r\n#{@text}"
+				body << "#{buildbodyboundary("text/plain; charset=#{@charset}; format=flowed", 'quoted-printable')}\r\n\r\n#{quote_text_if_necessary(@text)}"
 				
 				# html part
-				body << "#{buildbodyboundary('text/html; charset=ISO-8859-1', '7bit')}\r\n\r\n#{@html}"
+				body << "#{buildbodyboundary("text/html; charset=#{@charset}", 'quoted-printable')}\r\n\r\n#{quote_text_if_necessary(@html)}"
 				
 				body << "--#{@bodyboundary}--"
 			end
@@ -387,6 +391,36 @@ protected
 #    collection << enc
 #    return(collection.join("\n"))
     return(enc)
+  end
+  
+  def quote_text_if_necessary(text)
+    text = text.gsub( /[^a-z ]/i ) { quote_char($&) }.
+                gsub( / /, "_" )
+    text
+  end
+  
+  def quote_if_necessary(text, charset)
+    text = text.gsub( /[^a-z ]/i ) { quote_char($&) }.
+                gsub( / /, "_" )
+    "=?#{charset}?Q?#{text}?="
+  end
+  
+  def quote_address_if_necessary(address, charset)
+    if Array === address
+      address.map { |a| quote_address_if_necessary(a, charset) }
+    elsif address =~ /^(\S.*)\s+(<.*>)$/
+      address = $2
+      phrase = quote_if_necessary($1.gsub(/^['"](.*)['"]$/, '\1'), charset)
+      "\"#{phrase}\" #{address}"
+    else
+      address
+    end
+  end
+  
+  def quote_char(character)
+    result = ""
+    character.each_byte { |b| result << "=%02x" % b }
+    result
   end
   
 end
