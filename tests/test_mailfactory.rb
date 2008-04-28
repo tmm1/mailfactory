@@ -98,7 +98,7 @@ class TC_MailFactory < Test::Unit::TestCase
 			@mail.subject = "Test Subject"
 		}
 		
-		assert_equal("=?utf-8?Q?Test_Subject?=", @mail.subject.to_s, "subject does not equal what it was set to")
+		assert_equal("=?utf-8?Q?Test_Subject=?=", @mail.subject.to_s, "subject does not equal what it was set to")
 
 		assert_nothing_raised("exception raised while setting subject=") {
 			@mail.subject = "A Different Subject"
