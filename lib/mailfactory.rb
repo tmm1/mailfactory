@@ -26,7 +26,6 @@
 #     smtp.send_message(mail.to_s(), fromaddress, toaddress)
 #   }
 
-require 'base64'
 require 'pathname'
 
 # try to bring in the mime/types module, make a dummy module if it can't be found
@@ -381,7 +380,7 @@ protected
   # returns a base64 encoded version of the contents of str
   def file_encode(str)
     collection = Array.new()
-    enc = Base64.encode64(str)
+    enc = [str].pack('m')
     #  while(enc.length > 60)
     #    collection << enc.slice!(0..59)
     #  end
