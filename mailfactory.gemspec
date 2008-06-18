@@ -1,9 +1,10 @@
 require 'rubygems'
+require 'lib/mailfactory'
 
 spec = Gem::Specification.new do |s|
     s.add_dependency('mime-types', '>= 1.13.1')
     s.name = 'mailfactory'
-    s.version = "1.3.2"
+    s.version = MailFactory::VERSION
     s.platform = Gem::Platform::RUBY
     s.summary = "MailFactory is a pure-ruby MIME mail generator"
     s.description = "MailFactory is s simple module for producing RFC compliant mail that can include multiple attachments, multiple body parts, and arbitrary headers"
