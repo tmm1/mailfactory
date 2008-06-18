@@ -98,7 +98,7 @@ class TC_MailFactory < Test::Unit::TestCase
 			@mail.subject = "Test Subject"
 		}
 		
-		assert_equal("=?utf-8?Q?Test_Subject=?=", @mail.subject.to_s, "subject does not equal what it was set to")
+		assert_equal("=?utf-8?Q?Test_Subject?=", @mail.subject.to_s, "subject does not equal what it was set to")
 
 		assert_nothing_raised("exception raised while setting subject=") {
 			@mail.subject = "A Different Subject"
@@ -185,8 +185,23 @@ class TC_MailFactory < Test::Unit::TestCase
 		end
 	end
 	
+	def test_quoted_printable_with_instruction
+	  @mail.to="test@test.com"
+		@mail.from="test@othertest.com"
+		@mail.subject="My email subject has a ? in it and also an = and a _ too... Also some non-quoted junk ()!@\#\{\$\%\}"
+		@mail.text = "This is a test message with\na few\n\nlines."
+    assert_equal("=?utf-8?Q?My_email_subject_has_a_=3F_in_it_and_also_an_=3D_and_a_=5F_too..._Also_some_non-quoted_junk_()!@\#\{\$\%\}?=", @mail.subject.to_s)
+  end
+  
+  def test_utf8_quoted_printable_with_instruction
+    @mail.to="test@test.com"
+  	@mail.from="test@othertest.com"
+  	@mail.subject="My email subject has a Ã which is utf8."
+  	@mail.text = "This is a test message with\na few\n\nlines."
+    assert_equal("=?utf-8?Q?My_email_subject_has_a_=C3_which_is_utf8.?=", @mail.subject.to_s)
+  end
+	
 end
-
 
 $options = get_options()
 Test::Unit::UI::Console::TestRunner.run(TC_MailFactory)

@@ -393,15 +393,31 @@ protected
   
   # Convert the given text into quoted printable format, with an instruction
   # that the text be eventually interpreted in the given charset.
+  
   def quoted_printable_with_instruction(text, charset)
-    text = [text].pack("M").gsub(/\n/, "\r\n").chomp.gsub(/ /, "_")
+
+    text = quoted_printable_encode(text)
+
     "=?#{charset}?Q?#{text}?="
   end
 
 
   # Convert the given character to quoted printable format
+  # see http://tools.ietf.org/html/rfc2047
+  
   def quoted_printable_encode(text)
-    [text].pack("M").gsub(/\n/, "\r\n").chomp
+#    text = [text].pack("M").gsub(/\n/, "\r\n").chomp.gsub(/=$/, '')
+    text_arr = text.unpack("U*").map do |char|  
+      if char < 128 and char != 61 # 61 is ascii '='
+        [char].pack("c")
+      else 
+        sprintf("=%X",char)
+      end
+    end 
+      # turns non ascii chars into =A5
+    text = text_arr.join("")
+    
+    text.chomp.gsub(/=$/, '').gsub('?', '=3F').gsub('_', '=5F').gsub(/ /, "_")
   end
 
 
