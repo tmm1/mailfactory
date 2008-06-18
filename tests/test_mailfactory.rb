@@ -201,6 +201,14 @@ class TC_MailFactory < Test::Unit::TestCase
     assert_equal("=?utf-8?Q?My_email_subject_has_a_=C3_which_is_utf8.?=", @mail.subject.to_s)
   end
 	
+  def test_quoted_printable_html
+    @mail.to="test@test.com"
+    @mail.from="test@othertest.com"
+    @mail.subject="some html"
+    @mail.html="<a href=\"http://google.com\">click here</a>"
+    assert_match('<a href=3D"http://google.com">click here</a>', @mail.to_s)
+  end
+
 end
 
 $options = get_options()

@@ -394,43 +394,48 @@ protected
   # that the text be eventually interpreted in the given charset.
   
   def quoted_printable_with_instruction(text, charset)
-
-    text = quoted_printable_encode(text)
-
+    text = quoted_printable_encode_header(text)
     "=?#{charset}?Q?#{text}?="
   end
 
+  # rfc2045 compatible. use rfc2047 for headers (such as the Subject line) instead
+  def quoted_printable_encode(text)
+    [text].pack('M').gsub(/\n/, "\r\n").chomp.gsub(/=$/, '')
+  end
 
   # Convert the given character to quoted printable format
   # see http://tools.ietf.org/html/rfc2047
   
-  def quoted_printable_encode(text)
-#    text = [text].pack("M").gsub(/\n/, "\r\n").chomp.gsub(/=$/, '')
-    text_arr = text.unpack("U*").map do |char|  
-      if char < 128 and char != 61 # 61 is ascii '='
-        [char].pack("c")
-      else 
-        sprintf("=%X",char)
-      end
-    end 
-      # turns non ascii chars into =A5
-    text = text_arr.join("")
-    
-    text.chomp.gsub(/=$/, '').gsub('?', '=3F').gsub('_', '=5F').gsub(/ /, "_")
+  def quoted_printable_encode_header(text)
+    text.scan(/./u).map do |char|
+      (char[0] < 128 and char[0] != 61) ? # 61 is ascii '='
+        char :
+        '=%X' % char[0]
+    end.join('').
+        chomp.
+        gsub(/=$/,'').
+        gsub('?', '=3F').
+        gsub('_', '=5F').
+        gsub(/ /, '_')
   end
 
 
   # A quick-and-dirty regexp for determining whether a string contains any
   # characters that need escaping.
-  if !defined?(CHARS_NEEDING_QUOTING)
-    CHARS_NEEDING_QUOTING = /[\000-\011\013\014\016-\037\177-\377]/
-  end
+  #--
+  # Jun18-08: deprecated, since all multipart blocks are marked quoted-printable, quoting is required
+
+  # if !defined?(CHARS_NEEDING_QUOTING)
+  #   CHARS_NEEDING_QUOTING = /[\000-\011\013\014\016-\037\177-\377]/
+  # end
 
 
   # Quote the given text if it contains any "illegal" characters
   def quote_if_necessary(text, charset, instruction = false)
+    return unless text
     text = text.dup.force_encoding(Encoding::ASCII_8BIT) if text.respond_to?(:force_encoding)
-    (text =~ CHARS_NEEDING_QUOTING) ? (instruction ? quoted_printable_with_instruction(text, charset) : quoted_printable_encode(text)) : text
+    #(text =~ CHARS_NEEDING_QUOTING) ? (instruction ? quoted_printable_with_instruction(text, charset) : quoted_printable_encode(text)) : text
+    instruction ? quoted_printable_with_instruction(text, charset) : quoted_printable_encode(text)
   end
 
 
