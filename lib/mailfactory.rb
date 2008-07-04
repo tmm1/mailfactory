@@ -410,9 +410,10 @@ protected
   
   def quoted_printable_encode_header(text)
     text.scan(/./u).map do |char|
-      (char[0] < 128 and char[0] != 61) ? # 61 is ascii '='
+      ord = char.respond_to?(:ord) ? char.ord : char[0]
+      (ord < 128 and ord != 61) ? # 61 is ascii '='
         char :
-        '=%X' % char[0]
+        '=%X' % ord
     end.join('').
         chomp.
         gsub(/=$/,'').
