@@ -48,7 +48,7 @@ end
 # An easy class for creating a mail message
 class MailFactory
 
-  VERSION = '1.3.5'
+  VERSION = '1.3.6'
   
   def initialize()
     @headers = Array.new()
