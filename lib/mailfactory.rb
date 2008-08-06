@@ -408,9 +408,10 @@ protected
   # Convert the given character to quoted printable format
   # see http://tools.ietf.org/html/rfc2047
   
+  require 'enumerator' unless ''.respond_to? :enum_for
+
   def quoted_printable_encode_header(text)
-    (text.respond_to?(:bytes) ? text.bytes :
-                                text.scan(/./m).map{|c| c[0] }).map do |ord|
+    text.enum_for(:each_byte).map do |ord|
       if ord < 128 and ord != 61 # 61 is ascii '='
         ord.chr
       else
