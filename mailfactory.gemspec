@@ -19,7 +19,6 @@ spec = Gem::Specification.new do |s|
     s.test_files = "./tests/test_mailfactory.rb"
 end
 
-
 if $0==__FILE__
 	Gem.manage_gems
 	Gem::Builder.new(spec).build
