@@ -409,11 +409,13 @@ protected
   # see http://tools.ietf.org/html/rfc2047
   
   def quoted_printable_encode_header(text)
-    text.scan(/./u).map do |char|
-      ord = char.respond_to?(:ord) ? char.ord : char[0]
-      (ord < 128 and ord != 61) ? # 61 is ascii '='
-        char :
+    (text.respond_to?(:bytes) ? text.bytes :
+                                text.scan(/./m).map{|c| c[0] }).map do |ord|
+      if ord < 128 and ord != 61 # 61 is ascii '='
+        ord.chr
+      else
         '=%X' % ord
+      end
     end.join('').
         chomp.
         gsub(/=$/,'').

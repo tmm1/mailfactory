@@ -193,13 +193,22 @@ class TC_MailFactory < Test::Unit::TestCase
 		@mail.text = "This is a test message with\na few\n\nlines."
     assert_equal(["=?utf-8?Q?My_email_subject_has_a_=3F_in_it_and_also_an_=3D_and_a_=5F_too..._Also_some_non-quoted_junk_()!@\#\{\$\%\}?="], @mail.subject)
   end
+
+  def test_scandinavian_subject_quoting
+    @mail.to="test@test.com"
+    @mail.from="test@othertest.com"
+    # Three a with dots and three o with dots.
+    @mail.subject="\303\244\303\244\303\244\303\266\303\266\303\266"
+    @mail.text = "This is a test message with\na few\n\nlines."
+    assert_equal(["=?utf-8?Q?=C3=A4=C3=A4=C3=A4=C3=B6=C3=B6=C3=B6?="], @mail.subject)
+  end
   
   def test_utf8_quoted_printable_with_instruction
     @mail.to="test@test.com"
-  	@mail.from="test@othertest.com"
-  	@mail.subject="My email subject has a Ã which is utf8."
-  	@mail.text = "This is a test message with\na few\n\nlines."
-    assert_equal(["=?utf-8?Q?My_email_subject_has_a_=C3_which_is_utf8.?="], @mail.subject)
+    @mail.from="test@othertest.com"
+    @mail.subject="My email subject has a Ã which is utf8."
+    @mail.text = "This is a test message with\na few\n\nlines."
+    assert_equal(["=?utf-8?Q?My_email_subject_has_a_=C3=83_which_is_utf8.?="], @mail.subject)
   end
 	
   def test_quoted_printable_html
